@@ -28,7 +28,7 @@ namespace LaneChanger
                 netManager.m_lanes.m_buffer[laneId].m_flags &= (ushort) ~toggleFlag;
             else
                 netManager.m_lanes.m_buffer[laneId].m_flags |= toggleFlag;
-            //Let's see if updating the node does anything
+            //Let's see if updating the node does anything - doesn't appear to
             NetSegment segment = netManager.m_segments.m_buffer[netManager.m_lanes.m_buffer[laneId].m_segment];
             if (segment.m_startNode != 0)
                 netManager.UpdateNode(segment.m_startNode, netManager.m_lanes.m_buffer[laneId].m_segment, 0);
