@@ -1,4 +1,8 @@
-﻿using UnityEngine;
+﻿/*
+ * LaneUIManager.cs - Adds the Lanes button and generally kicks off the process.
+ * 
+ */
+using UnityEngine;
 using ICities;
 using ColossalFramework.UI;
 
@@ -23,6 +27,9 @@ namespace LaneChanger
             //this adds an UIComponent to the view
             uiComponent = v.AddUIComponent(typeof(LaneUIToggle));
         }
+
+
+        // Not sure if these two are needed
 
         public override void OnReleased()
         {

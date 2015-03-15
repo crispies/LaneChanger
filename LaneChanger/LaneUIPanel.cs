@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿/*
+ * LaneUIPanel.cs - Defines the main UI panel for editing lanes
+ */
+using UnityEngine;
 using ColossalFramework;
 using ColossalFramework.UI;
 

@@ -1,4 +1,8 @@
-﻿using UnityEngine;
+﻿/*
+ * LaneDirectionToggleButton.cs - Buttons to toggle lane flags
+ * 
+ */
+using UnityEngine;
 using ColossalFramework;
 using ColossalFramework.UI;
 
@@ -21,13 +25,9 @@ namespace LaneChanger
         {
             NetManager netManager = Singleton<NetManager>.instance;
             if((netManager.m_lanes.m_buffer[laneId].m_flags & toggleFlag) == toggleFlag) 
-            {
                 netManager.m_lanes.m_buffer[laneId].m_flags &= (ushort) ~toggleFlag;
-            }
             else
-            {
                 netManager.m_lanes.m_buffer[laneId].m_flags |= toggleFlag;
-            }
             //Let's see if updating the node does anything
             NetSegment segment = netManager.m_segments.m_buffer[netManager.m_lanes.m_buffer[laneId].m_segment];
             if (segment.m_startNode != 0)

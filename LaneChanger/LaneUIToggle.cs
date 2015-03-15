@@ -1,4 +1,8 @@
-﻿using UnityEngine;
+﻿/*
+ * LaneUIToggle.cs - Activates/Deactivates the segment selector tool.
+ * 
+ */
+using UnityEngine;
 using ColossalFramework.UI;
 
 namespace LaneChanger

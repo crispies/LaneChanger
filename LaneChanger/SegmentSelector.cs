@@ -1,4 +1,8 @@
-﻿using UnityEngine;
+﻿/*
+ * SegmentSelector.cs - Defines the segment selector tool
+ * 
+ */
+using UnityEngine;
 using ColossalFramework;
 using ColossalFramework.UI;
 
@@ -52,6 +56,8 @@ namespace LaneChanger
             }
         }
 
+        // I am not sure why the tool controller needs to be injected here.
+        // ToolBase suggests this should happen on its own, but it does not.
         protected override void OnEnable()
         {
             m_toolController = GameObject.FindObjectOfType<ToolController>();
