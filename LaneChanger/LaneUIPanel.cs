@@ -50,8 +50,8 @@ namespace LaneChanger
 
         private void DrawSegmentInfoBox() 
         {
-            NetManager netManager = Singleton<NetManager>.instance;
-            this.width = 180;
+            NetManager netManager = NetManager.instance;
+            this.width = 400;
             this.height = 55 + 40 * currentSegment.Info.m_lanes.Length;
             this.transformPosition = calculateBoxPosition();                      
             segmentLabel = this.AddUIComponent<UILabel>();
@@ -59,9 +59,13 @@ namespace LaneChanger
             segmentLabel.wordWrap = false;
             segmentLabel.width = 178f;
             segmentLabel.height = 35f;
-            segmentLabel.text = currentSegment.Info.name + "\n" + currentSegment.Info.m_lanes.Length + " lanes";
-            DrawCloseButton();
+            
             uint currentLane = currentSegment.m_lanes;
+            ushort segmentId = netManager.m_lanes.m_buffer[currentLane].m_segment;
+
+            segmentLabel.text = segmentId + " " + currentSegment.Info.name + "\n" + currentSegment.Info.m_lanes.Length + " lanes";
+            DrawCloseButton();
+            
             int laneCounter = 0;
             while (laneCounter < currentSegment.Info.m_lanes.Length && currentLane != 0)
             {
@@ -79,6 +83,16 @@ namespace LaneChanger
                 
                 LaneDirectionToggleButton rightToggle = this.AddUIComponent<LaneDirectionToggleButton>();
                 rightToggle.DrawButton(currentLane, NetLane.Flags.Right, new Vector3(135f, 40f + 40f * laneCounter));
+
+                UILabel laneTargetLabel = this.AddUIComponent<UILabel>();
+                laneTargetLabel.relativePosition = new Vector3(175f, 40f + 40f * laneCounter);
+                ushort leftSegment, rightSegment;
+                
+                currentSegment.GetLeftAndRightSegments(currentSegment.m_startNode, out leftSegment, out rightSegment);
+                laneTargetLabel.text = "S[L: " + leftSegment + " R: " + rightSegment + "]";
+
+                currentSegment.GetLeftAndRightSegments(currentSegment.m_endNode, out leftSegment, out rightSegment);
+                laneTargetLabel.text += " E[L: " + leftSegment + " R: " + rightSegment + "]";
 
                 currentLane = lane.m_nextLane;
                 laneCounter++;
