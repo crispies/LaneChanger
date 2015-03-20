@@ -24,7 +24,7 @@ namespace LaneChanger
                 if (segmentId != 0)
                 {   
                     NetSegment segment = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-                    LaneChangerManager.DebugMessage("Segment Flags: " + segment.m_flags);       
+                    LaneUIManager.DebugMessage("Segment Flags: " + segment.m_flags);       
                     if (box != null)
                     {
                         Object.Destroy(box);
@@ -47,7 +47,7 @@ namespace LaneChanger
             input.m_ignoreTerrain = true;
             if (RayCast(input, out output))
             {
-                LaneChangerManager.DebugMessage("Raycast success " + output.m_netSegment.ToString());
+                LaneUIManager.DebugMessage("Raycast success " + output.m_netSegment.ToString());
                 return output.m_netSegment;
             }
             else

@@ -23,7 +23,7 @@ namespace LaneChanger
 
         private void ButtonClick(UIComponent component, UIMouseEventParameter eventParam)
         {
-            NetManager netManager = NetManager.instance;
+            NetManager netManager = Singleton<NetManager>.instance;
             if((netManager.m_lanes.m_buffer[laneId].m_flags & toggleFlag) == toggleFlag) 
                 netManager.m_lanes.m_buffer[laneId].m_flags &= (ushort) ~toggleFlag;
             else
@@ -70,7 +70,7 @@ namespace LaneChanger
 
         public void UpdateButtonState()
         {
-            NetManager netManager = NetManager.instance;
+            NetManager netManager = Singleton<NetManager>.instance;
             if ((toggleFlag & netManager.m_lanes.m_buffer[laneId].m_flags) == toggleFlag)
             {
                 this.state = ButtonState.Pressed;
