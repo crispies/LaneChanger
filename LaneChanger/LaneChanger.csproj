@@ -54,6 +54,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LaneChangerManager.cs" />
+    <Compile Include="LaneChangerPathFind.cs" />
+    <Compile Include="LaneChangerPathManager.cs" />
     <Compile Include="LaneDirectionToggleButton.cs" />
     <Compile Include="LaneUIPanel.cs" />
     <Compile Include="LaneUIManager.cs" />

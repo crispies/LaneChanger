@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using System.Reflection;
 using UnityEngine;
+
 namespace LaneChanger
 {
     public class LaneChangerPathFind : PathFind
@@ -1119,6 +1120,44 @@ namespace LaneChanger
                                     item2.m_comparisonValue += Mathf.Max(1f, num13 * 3f - 3f) / ((num5 + lane2.m_speedLimit) * 0.5f * this.m_maxLength);
                                 }
                             }
+                            /*
+                            NetSegment seg2 = instance.m_segments.m_buffer[item2.m_position.m_segment];
+                            if (item2.m_direction == NetInfo.Direction.Forward)
+                            {
+                                if (seg2.GetLeftSegment(seg2.m_endNode) == item.m_position.m_segment)
+                                {
+                                    if ((((NetLane.Flags)instance.m_lanes.m_buffer[item2.m_laneID].m_flags) & NetLane.Flags.Left) == NetLane.Flags.Left)
+                                        this.AddBufferItem(item2, item.m_position);
+                                }
+                                else if (seg2.GetRightSegment(seg2.m_endNode) == item.m_position.m_segment)
+                                {
+                                    if ((((NetLane.Flags)instance.m_lanes.m_buffer[item2.m_laneID].m_flags) & NetLane.Flags.Right) == NetLane.Flags.Right)
+                                        this.AddBufferItem(item2, item.m_position);
+                                }  
+                                else
+                                {
+                                    this.AddBufferItem(item2, item.m_position);
+                                }
+                            }
+                            else
+                            {
+                                if (seg2.GetLeftSegment(seg2.m_startNode) == item.m_position.m_segment)
+                                {
+                                    Debug.Log("left seg?");
+                                    if (((((NetLane.Flags)instance.m_lanes.m_buffer[item2.m_laneID].m_flags) & NetLane.Flags.Left) == NetLane.Flags.Left) || ((NetLane.Flags.LeftForwardRight & (NetLane.Flags)instance.m_lanes.m_buffer[item2.m_laneID].m_flags) == NetLane.Flags.None))
+                                        this.AddBufferItem(item2, item.m_position);
+                                }
+                                else if (seg2.GetRightSegment(seg2.m_startNode) == item.m_position.m_segment)
+                                {
+                                    if ((((NetLane.Flags)instance.m_lanes.m_buffer[item2.m_laneID].m_flags) & NetLane.Flags.Right) == NetLane.Flags.Right || ((NetLane.Flags.LeftForwardRight & (NetLane.Flags)instance.m_lanes.m_buffer[item2.m_laneID].m_flags) == NetLane.Flags.None))
+                                        this.AddBufferItem(item2, item.m_position);
+                                }
+                                else
+                                {
+                                    this.AddBufferItem(item2, item.m_position);
+                                }  
+                            }
+                            */
                             this.AddBufferItem(item2, item.m_position);
                         }
                     }
