@@ -11,6 +11,7 @@ namespace LaneChanger
     public class SegmentSelector : ToolBase
     {
         public LaneUIToggle button;
+        public int currentSegment;
         LaneUIPanel box;
        
         override protected void OnToolUpdate() 
@@ -24,7 +25,6 @@ namespace LaneChanger
                 if (segmentId != 0)
                 {   
                     NetSegment segment = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-                    LaneUIManager.DebugMessage("Segment Flags: " + segment.m_flags);       
                     if (box != null)
                     {
                         Object.Destroy(box);
@@ -37,6 +37,15 @@ namespace LaneChanger
             
         }
 
+        public override void RenderOverlay(RenderManager.CameraInfo cameraInfo)
+        {
+            if (currentSegment != 0)
+            {
+                NetTool.RenderOverlay(RenderManager.instance.CurrentCameraInfo, ref NetManager.instance.m_segments.m_buffer[currentSegment], new Color(0.0f, 1f, 0.5f, 0.6f), new Color(0, 1, 0, 0.9f));
+            }
+            base.RenderOverlay(cameraInfo);
+        }
+
         private ushort GetSegmentAtCursor() 
         {
             Vector3 mousePosition = Input.mousePosition;
@@ -47,13 +56,14 @@ namespace LaneChanger
             input.m_ignoreTerrain = true;
             if (RayCast(input, out output))
             {
-                LaneUIManager.DebugMessage("Raycast success " + output.m_netSegment.ToString());
+                currentSegment = output.m_netSegment;
                 return output.m_netSegment;
             }
             else
             {
                 return 0;
             }
+            
         }
 
         // I am not sure why the tool controller needs to be injected here.
@@ -70,7 +80,8 @@ namespace LaneChanger
             {
                 Object.Destroy(box);
             }
-            button.CancelLaneSelect();
+            button.textColor = new Color32(255, 255, 255, 255);
+            button.laneSelectEnabled = false;
             base.OnDisable();
         }
     }

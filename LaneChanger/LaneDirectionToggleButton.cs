@@ -28,12 +28,6 @@ namespace LaneChanger
                 netManager.m_lanes.m_buffer[laneId].m_flags &= (ushort) ~toggleFlag;
             else
                 netManager.m_lanes.m_buffer[laneId].m_flags |= toggleFlag;
-            //Let's see if updating the node does anything - doesn't appear to
-            NetSegment segment = netManager.m_segments.m_buffer[netManager.m_lanes.m_buffer[laneId].m_segment];
-            if (segment.m_startNode != 0)
-                netManager.UpdateNode(segment.m_startNode, netManager.m_lanes.m_buffer[laneId].m_segment, 0);
-            if (segment.m_endNode != 0)
-                netManager.UpdateNode(segment.m_endNode, netManager.m_lanes.m_buffer[laneId].m_segment, 0);
 
             UpdateButtonState();
         }
@@ -49,6 +43,7 @@ namespace LaneChanger
             this.disabledBgSprite = "ButtonMenuDisabled";
             this.hoveredBgSprite = "ButtonMenuHovered";
             this.pressedBgSprite = "ButtonMenuPressed";
+            this.pressedColor = new Color(0f, 0.6f, 0f);
             this.eventClick += ButtonClick;
             this.text = flag == NetLane.Flags.Forward ? "F" : flag == NetLane.Flags.Left ? "L" : "R";
             this.height = 30;

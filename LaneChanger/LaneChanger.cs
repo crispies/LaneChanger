@@ -15,7 +15,7 @@ namespace LaneChanger
 
         public string Description
         {
-            get { return "Allows changing directions of individual lanes."; }
+            get { return "Adds no left/right turn and ability to change direction of individual lanes."; }
         }
     }
 }

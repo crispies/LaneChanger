@@ -50,9 +50,9 @@ namespace LaneChanger
 
         public void CancelLaneSelect()
         {
-            Object.Destroy(laneSelector);
-            this.textColor = new Color32(255, 255, 255, 255);
-            laneSelectEnabled = false;
+            ToolController toolController = GameObject.FindObjectOfType<ToolController>();
+            toolController.CurrentTool = toolController.GetComponent<DefaultTool>();
+
         }
 
         private void ButtonClick(UIComponent component, UIMouseEventParameter eventParam)

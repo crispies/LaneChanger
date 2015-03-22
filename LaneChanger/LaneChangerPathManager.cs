@@ -15,9 +15,7 @@ namespace LaneChanger
         //On waking up, replace the stock pathfinders with the custom one
         new void Awake()
         {
-            Debug.Log("PathFinder awake.");
             PathFind[] stockPathFinds = GetComponents<PathFind>();
-            Debug.Log("found " + stockPathFinds.Length + " old path finds");
             replacementPathFinds = new LaneChangerPathFind[stockPathFinds.Length];
             for (int i = 0; i < stockPathFinds.Length; i++)
             {
@@ -40,6 +38,10 @@ namespace LaneChanger
             this.m_pathUnits = stockPathManager.m_pathUnits;
             this.m_bufferLock = stockPathManager.m_bufferLock;
         }
+
+        //
+        // BEGIN STOCK CODE
+        //
         
         public new bool CreatePath(out uint unit, ref Randomizer randomizer, uint buildIndex, PathUnit.Position startPos, PathUnit.Position endPos, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength)
         {
@@ -59,7 +61,6 @@ namespace LaneChanger
 
         public new bool CreatePath(out uint unit, ref Randomizer randomizer, uint buildIndex, PathUnit.Position startPosA, PathUnit.Position startPosB, PathUnit.Position endPosA, PathUnit.Position endPosB, PathUnit.Position vehiclePosition, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength, bool isHeavyVehicle, bool ignoreBlocked, bool stablePath, bool skipQueue)
         {
-            Debug.Log("creating path");
             while (!Monitor.TryEnter(this.m_bufferLock, SimulationManager.SYNCHRONIZE_TIMEOUT))
             {
             }

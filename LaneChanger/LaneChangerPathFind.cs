@@ -287,8 +287,9 @@ namespace LaneChanger
             this.m_buffer = new LaneChangerPathFind.BufferItem[65536];
             this.m_bufferLock = LaneChangerPathManager.instance.m_bufferLock;
             this.m_pathUnits = LaneChangerPathManager.instance.m_pathUnits;
+            this.m_queueLock = new object();
 
-            //Launch a new pathfinding thread
+            //Launch a new pathfinding thread, from the stock code
             this.m_pathFindThread = new Thread(new ThreadStart(this.PathFindThread));
             this.m_pathFindThread.Name = "Pathfind";
             this.m_pathFindThread.Start();
@@ -316,7 +317,7 @@ namespace LaneChanger
             }
         }
 
-        
+        //Stock code
         public new bool CalculatePath(uint unit, bool skipQueue)
         {
             if (Singleton<PathManager>.instance.AddPathReference(unit))
@@ -364,6 +365,8 @@ namespace LaneChanger
             }
             return false;
         }
+
+        //Stock code
         public new void WaitForAllPaths()
         {
             while (!Monitor.TryEnter(this.m_queueLock, SimulationManager.SYNCHRONIZE_TIMEOUT))
@@ -381,6 +384,8 @@ namespace LaneChanger
                 Monitor.Exit(this.m_queueLock);
             }
         }
+
+
         private void PathFindImplementation(uint unit, ref PathUnit data)
         {
             NetManager instance = Singleton<NetManager>.instance;
@@ -394,67 +399,67 @@ namespace LaneChanger
             this.m_stablePath = ((this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_simulationFlags & 64) != 0);
             int num = (int)(this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_positionCount & 15);
             int num2 = this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_positionCount >> 4;
-            LaneChangerPathFind.BufferItem bufferItem;
+            LaneChangerPathFind.BufferItem startPosA;
             if (data.m_position00.m_segment != 0 && num >= 1)
             {
                 this.m_startLaneA = PathManager.GetLaneID(data.m_position00);
                 this.m_startOffsetA = data.m_position00.m_offset;
-                bufferItem.m_laneID = this.m_startLaneA;
-                bufferItem.m_position = data.m_position00;
-                this.GetLaneDirection(data.m_position00, out bufferItem.m_direction, out bufferItem.m_lanesUsed);
-                bufferItem.m_comparisonValue = 0f;
+                startPosA.m_laneID = this.m_startLaneA;
+                startPosA.m_position = data.m_position00;
+                this.GetLaneDirection(data.m_position00, out startPosA.m_direction, out startPosA.m_lanesUsed);
+                startPosA.m_comparisonValue = 0f;
             }
             else
             {
                 this.m_startLaneA = 0u;
                 this.m_startOffsetA = 0;
-                bufferItem = default(LaneChangerPathFind.BufferItem);
+                startPosA = default(LaneChangerPathFind.BufferItem);
             }
-            LaneChangerPathFind.BufferItem bufferItem2;
+            LaneChangerPathFind.BufferItem startPosB;
             if (data.m_position02.m_segment != 0 && num >= 3)
             {
                 this.m_startLaneB = PathManager.GetLaneID(data.m_position02);
                 this.m_startOffsetB = data.m_position02.m_offset;
-                bufferItem2.m_laneID = this.m_startLaneB;
-                bufferItem2.m_position = data.m_position02;
-                this.GetLaneDirection(data.m_position02, out bufferItem2.m_direction, out bufferItem2.m_lanesUsed);
-                bufferItem2.m_comparisonValue = 0f;
+                startPosB.m_laneID = this.m_startLaneB;
+                startPosB.m_position = data.m_position02;
+                this.GetLaneDirection(data.m_position02, out startPosB.m_direction, out startPosB.m_lanesUsed);
+                startPosB.m_comparisonValue = 0f;
             }
             else
             {
                 this.m_startLaneB = 0u;
                 this.m_startOffsetB = 0;
-                bufferItem2 = default(LaneChangerPathFind.BufferItem);
+                startPosB = default(LaneChangerPathFind.BufferItem);
             }
-            LaneChangerPathFind.BufferItem bufferItem3;
+            LaneChangerPathFind.BufferItem endPosA;
             if (data.m_position01.m_segment != 0 && num >= 2)
             {
                 this.m_endLaneA = PathManager.GetLaneID(data.m_position01);
-                bufferItem3.m_laneID = this.m_endLaneA;
-                bufferItem3.m_position = data.m_position01;
-                this.GetLaneDirection(data.m_position01, out bufferItem3.m_direction, out bufferItem3.m_lanesUsed);
-                bufferItem3.m_methodDistance = 0f;
-                bufferItem3.m_comparisonValue = 0f;
+                endPosA.m_laneID = this.m_endLaneA;
+                endPosA.m_position = data.m_position01;
+                this.GetLaneDirection(data.m_position01, out endPosA.m_direction, out endPosA.m_lanesUsed);
+                endPosA.m_methodDistance = 0f;
+                endPosA.m_comparisonValue = 0f;
             }
             else
             {
                 this.m_endLaneA = 0u;
-                bufferItem3 = default(LaneChangerPathFind.BufferItem);
+                endPosA = default(LaneChangerPathFind.BufferItem);
             }
-            LaneChangerPathFind.BufferItem bufferItem4;
+            LaneChangerPathFind.BufferItem endPosB;
             if (data.m_position03.m_segment != 0 && num >= 4)
             {
                 this.m_endLaneB = PathManager.GetLaneID(data.m_position03);
-                bufferItem4.m_laneID = this.m_endLaneB;
-                bufferItem4.m_position = data.m_position03;
-                this.GetLaneDirection(data.m_position03, out bufferItem4.m_direction, out bufferItem4.m_lanesUsed);
-                bufferItem4.m_methodDistance = 0f;
-                bufferItem4.m_comparisonValue = 0f;
+                endPosB.m_laneID = this.m_endLaneB;
+                endPosB.m_position = data.m_position03;
+                this.GetLaneDirection(data.m_position03, out endPosB.m_direction, out endPosB.m_lanesUsed);
+                endPosB.m_methodDistance = 0f;
+                endPosB.m_comparisonValue = 0f;
             }
             else
             {
                 this.m_endLaneB = 0u;
-                bufferItem4 = default(LaneChangerPathFind.BufferItem);
+                endPosB = default(LaneChangerPathFind.BufferItem);
             }
             if (data.m_position11.m_segment != 0 && num2 >= 1)
             {
@@ -466,7 +471,7 @@ namespace LaneChanger
                 this.m_vehicleLane = 0u;
                 this.m_vehicleOffset = 0;
             }
-            LaneChangerPathFind.BufferItem bufferItem5 = default(LaneChangerPathFind.BufferItem);
+            LaneChangerPathFind.BufferItem goalItem = default(LaneChangerPathFind.BufferItem);
             byte b = 0;
             this.m_bufferMinPos = 0;
             this.m_bufferMaxPos = -1;
@@ -483,15 +488,15 @@ namespace LaneChanger
                 this.m_bufferMin[j] = 0;
                 this.m_bufferMax[j] = -1;
             }
-            if (bufferItem3.m_position.m_segment != 0)
+            if (endPosA.m_position.m_segment != 0)
             {
                 this.m_bufferMax[0]++;
-                this.m_buffer[++this.m_bufferMaxPos] = bufferItem3;
+                this.m_buffer[++this.m_bufferMaxPos] = endPosA;
             }
-            if (bufferItem4.m_position.m_segment != 0)
+            if (endPosB.m_position.m_segment != 0)
             {
                 this.m_bufferMax[0]++;
-                this.m_buffer[++this.m_bufferMaxPos] = bufferItem4;
+                this.m_buffer[++this.m_bufferMaxPos] = endPosB;
             }
             bool flag = false;
             while (this.m_bufferMinPos <= this.m_bufferMaxPos)
@@ -505,73 +510,77 @@ namespace LaneChanger
                 else
                 {
                     this.m_bufferMin[this.m_bufferMinPos] = num4 + 1;
-                    LaneChangerPathFind.BufferItem bufferItem6 = this.m_buffer[(this.m_bufferMinPos << 6) + num4];
-                    if (bufferItem6.m_position.m_segment == bufferItem.m_position.m_segment && bufferItem6.m_position.m_lane == bufferItem.m_position.m_lane)
+                    LaneChangerPathFind.BufferItem currentItem = this.m_buffer[(this.m_bufferMinPos << 6) + num4];
+                    if (currentItem.m_position.m_segment == startPosA.m_position.m_segment && currentItem.m_position.m_lane == startPosA.m_position.m_lane)
                     {
-                        if ((byte)(bufferItem6.m_direction & NetInfo.Direction.Forward) != 0 && bufferItem6.m_position.m_offset >= this.m_startOffsetA)
+                        if ((byte)(currentItem.m_direction & NetInfo.Direction.Forward) != 0 && currentItem.m_position.m_offset >= this.m_startOffsetA)
                         {
-                            bufferItem5 = bufferItem6;
+                            goalItem = currentItem;
                             b = this.m_startOffsetA;
                             flag = true;
                             break;
                         }
-                        if ((byte)(bufferItem6.m_direction & NetInfo.Direction.Backward) != 0 && bufferItem6.m_position.m_offset <= this.m_startOffsetA)
+                        if ((byte)(currentItem.m_direction & NetInfo.Direction.Backward) != 0 && currentItem.m_position.m_offset <= this.m_startOffsetA)
                         {
-                            bufferItem5 = bufferItem6;
+                            goalItem = currentItem;
                             b = this.m_startOffsetA;
                             flag = true;
                             break;
                         }
                     }
-                    if (bufferItem6.m_position.m_segment == bufferItem2.m_position.m_segment && bufferItem6.m_position.m_lane == bufferItem2.m_position.m_lane)
+                    if (currentItem.m_position.m_segment == startPosB.m_position.m_segment && currentItem.m_position.m_lane == startPosB.m_position.m_lane)
                     {
-                        if ((byte)(bufferItem6.m_direction & NetInfo.Direction.Forward) != 0 && bufferItem6.m_position.m_offset >= this.m_startOffsetB)
+                        if ((byte)(currentItem.m_direction & NetInfo.Direction.Forward) != 0 && currentItem.m_position.m_offset >= this.m_startOffsetB)
                         {
-                            bufferItem5 = bufferItem6;
+                            goalItem = currentItem;
                             b = this.m_startOffsetB;
                             flag = true;
                             break;
                         }
-                        if ((byte)(bufferItem6.m_direction & NetInfo.Direction.Backward) != 0 && bufferItem6.m_position.m_offset <= this.m_startOffsetB)
+                        if ((byte)(currentItem.m_direction & NetInfo.Direction.Backward) != 0 && currentItem.m_position.m_offset <= this.m_startOffsetB)
                         {
-                            bufferItem5 = bufferItem6;
+                            goalItem = currentItem;
                             b = this.m_startOffsetB;
                             flag = true;
                             break;
                         }
                     }
-                    if ((byte)(bufferItem6.m_direction & NetInfo.Direction.Forward) != 0)
+                    if ((byte)(currentItem.m_direction & NetInfo.Direction.Forward) != 0)
                     {
-                        ushort startNode = instance.m_segments.m_buffer[(int)bufferItem6.m_position.m_segment].m_startNode;
-                        this.ProcessItem(bufferItem6, startNode, ref instance.m_nodes.m_buffer[(int)startNode], 0, false);
+                        ushort startNode = instance.m_segments.m_buffer[(int)currentItem.m_position.m_segment].m_startNode;
+                        this.ProcessItem(currentItem, startNode, ref instance.m_nodes.m_buffer[(int)startNode], 0, false);
                     }
-                    if ((byte)(bufferItem6.m_direction & NetInfo.Direction.Backward) != 0)
+                    if ((byte)(currentItem.m_direction & NetInfo.Direction.Backward) != 0)
                     {
-                        ushort endNode = instance.m_segments.m_buffer[(int)bufferItem6.m_position.m_segment].m_endNode;
-                        this.ProcessItem(bufferItem6, endNode, ref instance.m_nodes.m_buffer[(int)endNode], 255, false);
+                        ushort endNode = instance.m_segments.m_buffer[(int)currentItem.m_position.m_segment].m_endNode;
+                        this.ProcessItem(currentItem, endNode, ref instance.m_nodes.m_buffer[(int)endNode], 255, false);
                     }
                     int num6 = 0;
-                    ushort num7 = instance.m_lanes.m_buffer[(int)((UIntPtr)bufferItem6.m_laneID)].m_nodes;
+                    ushort num7 = instance.m_lanes.m_buffer[(int)((UIntPtr)currentItem.m_laneID)].m_nodes;
                     if (num7 != 0)
                     {
-                        ushort startNode2 = instance.m_segments.m_buffer[(int)bufferItem6.m_position.m_segment].m_startNode;
-                        ushort endNode2 = instance.m_segments.m_buffer[(int)bufferItem6.m_position.m_segment].m_endNode;
+                        //Debug.Log("Lane nodes?!!?");
+                        //Debug.Log("S" +  currentItem.m_position.m_segment + " L" + currentItem.m_position.m_lane + "/" + currentItem.m_laneID + " O" + currentItem.m_position.m_offset + " D" + currentItem.m_direction +
+                        //  "Lane nodes " + num7 + " next lane node " + instance.m_nodes.m_buffer[num7].m_nextLaneNode);
+
+                        ushort startNode2 = instance.m_segments.m_buffer[(int)currentItem.m_position.m_segment].m_startNode;
+                        ushort endNode2 = instance.m_segments.m_buffer[(int)currentItem.m_position.m_segment].m_endNode;
                         bool flag2 = ((instance.m_nodes.m_buffer[(int)startNode2].m_flags | instance.m_nodes.m_buffer[(int)endNode2].m_flags) & NetNode.Flags.Disabled) != NetNode.Flags.None;
                         while (num7 != 0)
                         {
                             NetInfo.Direction direction = NetInfo.Direction.None;
                             byte laneOffset = instance.m_nodes.m_buffer[(int)num7].m_laneOffset;
-                            if (laneOffset <= bufferItem6.m_position.m_offset)
+                            if (laneOffset <= currentItem.m_position.m_offset)
                             {
                                 direction |= NetInfo.Direction.Forward;
                             }
-                            if (laneOffset >= bufferItem6.m_position.m_offset)
+                            if (laneOffset >= currentItem.m_position.m_offset)
                             {
                                 direction |= NetInfo.Direction.Backward;
                             }
-                            if ((byte)(bufferItem6.m_direction & direction) != 0 && (!flag2 || (instance.m_nodes.m_buffer[(int)num7].m_flags & NetNode.Flags.Disabled) != NetNode.Flags.None))
+                            if ((byte)(currentItem.m_direction & direction) != 0 && (!flag2 || (instance.m_nodes.m_buffer[(int)num7].m_flags & NetNode.Flags.Disabled) != NetNode.Flags.None))
                             {
-                                this.ProcessItem(bufferItem6, num7, ref instance.m_nodes.m_buffer[(int)num7], laneOffset, true);
+                                this.ProcessItem(currentItem, num7, ref instance.m_nodes.m_buffer[(int)num7], laneOffset, true);
                             }
                             num7 = instance.m_nodes.m_buffer[(int)num7].m_nextLaneNode;
                             if (++num6 == 32768)
@@ -589,13 +598,33 @@ namespace LaneChanger
                 expr_8D5_cp_0[(int)expr_8D5_cp_1].m_pathFindFlags = (byte) (expr_8D5_cp_0[(int)expr_8D5_cp_1].m_pathFindFlags | 8);
                 return;
             }
-            float num8 = bufferItem5.m_comparisonValue * this.m_maxLength;
+            //else
+            //{
+
+            //    string path = "";
+            //    PathUnit.Position psn = goalItem.m_position;
+            //    uint lid = LaneChangerPathManager.GetLaneID(psn);
+            //    uint counter = 0;
+            //    path += "Posn[S:" + psn.m_segment + " L:" + psn.m_lane + "/" + lid + " O:" + psn.m_offset + "]\n";
+            //    while (counter < 32767 && !((psn.m_segment == endPosA.m_position.m_segment && psn.m_lane == endPosA.m_position.m_lane && psn.m_offset == endPosA.m_position.m_offset) || (psn.m_segment == endPosB.m_position.m_segment && psn.m_lane == endPosB.m_position.m_lane && psn.m_offset == endPosB.m_position.m_offset)))
+            //    {
+            //        psn = this.m_laneTarget[lid];
+            //        lid = LaneChangerPathManager.GetLaneID(psn);
+            //        path += "Posn[S:" + psn.m_segment + " L:" + psn.m_lane + "/" + lid + " O:" + psn.m_offset + "]\n";
+            //        counter++;
+            //    }
+            //    Debug.Log("Count: " + counter + " Start: [S:" + startPosA.m_position.m_segment + " L:" + startPosA.m_position.m_lane + " O:" + startPosA.m_position.m_offset + " D:" + startPosA.m_direction + "]" +
+            //        "EndA: [S:" + endPosA.m_position.m_segment + " L:" + endPosA.m_position.m_lane + " O:" + endPosA.m_position.m_offset + " D:" + endPosA.m_direction + "]" +
+            //        "EndB: [S:" + endPosB.m_position.m_segment + " L:" + endPosB.m_position.m_lane + " O:" + endPosB.m_position.m_offset + " D:" + endPosB.m_direction + "]" +
+            //        "\nPath found\n-------------------------\n" + path + "--------------------------------------\n" + "D: " + goalItem.m_direction + " T: " + this.m_laneTypes);
+            //}
+            float num8 = goalItem.m_comparisonValue * this.m_maxLength;
             this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_length = num8;
             uint num9 = unit;
             int num10 = 0;
             int num11 = 0;
-            PathUnit.Position position = bufferItem5.m_position;
-            if ((position.m_segment != bufferItem3.m_position.m_segment || position.m_lane != bufferItem3.m_position.m_lane || position.m_offset != bufferItem3.m_position.m_offset) && (position.m_segment != bufferItem4.m_position.m_segment || position.m_lane != bufferItem4.m_position.m_lane || position.m_offset != bufferItem4.m_position.m_offset))
+            PathUnit.Position position = goalItem.m_position;
+            if ((position.m_segment != endPosA.m_position.m_segment || position.m_lane != endPosA.m_position.m_lane || position.m_offset != endPosA.m_position.m_offset) && (position.m_segment != endPosB.m_position.m_segment || position.m_lane != endPosB.m_position.m_lane || position.m_offset != endPosB.m_position.m_offset))
             {
                 if (b != position.m_offset)
                 {
@@ -604,12 +633,12 @@ namespace LaneChanger
                     this.m_pathUnits.m_buffer[(int)((UIntPtr)num9)].SetPosition(num10++, position2);
                 }
                 this.m_pathUnits.m_buffer[(int)((UIntPtr)num9)].SetPosition(num10++, position);
-                position = this.m_laneTarget[(int)((UIntPtr)bufferItem5.m_laneID)];
+                position = this.m_laneTarget[(int)((UIntPtr)goalItem.m_laneID)];
             }
             for (int k = 0; k < 262144; k++)
             {
                 this.m_pathUnits.m_buffer[(int)((UIntPtr)num9)].SetPosition(num10++, position);
-                if ((position.m_segment == bufferItem3.m_position.m_segment && position.m_lane == bufferItem3.m_position.m_lane && position.m_offset == bufferItem3.m_position.m_offset) || (position.m_segment == bufferItem4.m_position.m_segment && position.m_lane == bufferItem4.m_position.m_lane && position.m_offset == bufferItem4.m_position.m_offset))
+                if ((position.m_segment == endPosA.m_position.m_segment && position.m_lane == endPosA.m_position.m_lane && position.m_offset == endPosA.m_position.m_offset) || (position.m_segment == endPosB.m_position.m_segment && position.m_lane == endPosB.m_position.m_lane && position.m_offset == endPosB.m_position.m_offset))
                 {
                     this.m_pathUnits.m_buffer[(int)((UIntPtr)num9)].m_positionCount = (byte)num10;
                     num11 += num10;
@@ -675,6 +704,7 @@ namespace LaneChanger
             expr_D65_cp_0[(int)expr_D65_cp_1].m_pathFindFlags = (byte) (expr_D65_cp_0[(int)expr_D65_cp_1].m_pathFindFlags | 8);
         }
 
+        // PathFind
         private void ProcessItem(LaneChangerPathFind.BufferItem item, ushort nodeID, ref NetNode node, byte connectOffset, bool isMiddle)
         {
             NetManager instance = Singleton<NetManager>.instance;
@@ -838,18 +868,112 @@ namespace LaneChanger
                     }
                 }
                 ushort num16 = instance.m_segments.m_buffer[(int)item.m_position.m_segment].GetRightSegment(nodeID);
-                for (int k = 0; k < 8; k++)
+                ushort segmentCount = 1;
+                ushort currentSegment = instance.m_segments.m_buffer[(int)item.m_position.m_segment].GetRightSegment(nodeID);
+                while (segmentCount < 5 && currentSegment != 0 && currentSegment != item.m_position.m_segment)
                 {
-                    if (num16 == 0 || num16 == item.m_position.m_segment)
-                    {
-                        break;
-                    }
-                    if (this.ProcessItem(item, nodeID, num16, ref instance.m_segments.m_buffer[(int)num16], ref num, connectOffset, true, false))
-                    {
-                        flag3 = true;
-                    }
-                    num16 = instance.m_segments.m_buffer[(int)num16].GetRightSegment(nodeID);
+                    segmentCount++;
+                    currentSegment = instance.m_segments.m_buffer[currentSegment].GetRightSegment(nodeID);
                 }
+                string infoName = instance.m_segments.m_buffer[item.m_position.m_segment].Info.name;
+                bool highwayFlag = (infoName != "Highway") && (infoName != "HighwayRamp") && (infoName != "Highway Bridge") && (infoName != "Highway Elevated");
+                if (segmentCount == 3 && instance.m_segments.m_buffer[item.m_position.m_segment].Info.m_lanes[item.m_position.m_lane].m_laneType == NetInfo.LaneType.Vehicle && highwayFlag)
+                {
+                    ushort rightSeg = instance.m_segments.m_buffer[item.m_position.m_segment].GetRightSegment(nodeID);
+                    ushort leftSeg = instance.m_segments.m_buffer[item.m_position.m_segment].GetLeftSegment(nodeID);
+                    if ((GetLaneFlags(leftSeg, nodeID) & NetLane.Flags.ForwardRight) != NetLane.Flags.None)
+                    {
+                        if (this.ProcessItem(item, nodeID, leftSeg, ref instance.m_segments.m_buffer[leftSeg], ref num, connectOffset, true, false))
+                            flag3 = true;
+                    }
+                    if ((GetLaneFlags(rightSeg, nodeID) & NetLane.Flags.Left) == NetLane.Flags.Left)
+                    {
+                        if (this.ProcessItem(item, nodeID, rightSeg, ref instance.m_segments.m_buffer[rightSeg], ref num, connectOffset, true, false))
+                            flag3 = true;
+                    }
+                }
+                else if (segmentCount == 4 && instance.m_segments.m_buffer[item.m_position.m_segment].Info.m_lanes[item.m_position.m_lane].m_laneType == NetInfo.LaneType.Vehicle && highwayFlag)
+                {
+                    //left segment
+                    ushort leftSeg = instance.m_segments.m_buffer[item.m_position.m_segment].GetLeftSegment(nodeID);
+                    bool anyRightTurn = false;
+                    NetLane curLane = instance.m_lanes.m_buffer[instance.m_segments.m_buffer[leftSeg].m_lanes];
+                    for (int i = 0; i < instance.m_segments.m_buffer[leftSeg].Info.m_lanes.Length; i++)
+                    {
+                        if (((NetLane.Flags)curLane.m_flags & NetLane.Flags.Right) == NetLane.Flags.Right)
+                        {
+                            anyRightTurn = true;
+                            break;
+                        }
+                        curLane = instance.m_lanes.m_buffer[curLane.m_nextLane];
+
+                    }
+                    if (anyRightTurn)
+                    {
+                        if (this.ProcessItem(item, nodeID, leftSeg, ref instance.m_segments.m_buffer[leftSeg], ref num, connectOffset, true, false))
+                        {
+                            flag3 = true;
+                        }
+                    }
+                    //right segment
+                    ushort rightSeg = instance.m_segments.m_buffer[item.m_position.m_segment].GetRightSegment(nodeID);
+                    bool anyLeftTurn = false;
+                    curLane = instance.m_lanes.m_buffer[instance.m_segments.m_buffer[rightSeg].m_lanes];
+                    for (int i = 0; i < instance.m_segments.m_buffer[rightSeg].Info.m_lanes.Length; i++)
+                    {
+                        if (((NetLane.Flags)curLane.m_flags & NetLane.Flags.Left) == NetLane.Flags.Left)
+                        {
+                            anyLeftTurn = true;
+                            break;
+                        }
+                        curLane = instance.m_lanes.m_buffer[curLane.m_nextLane];
+                    }
+                    if (anyLeftTurn)
+                    {
+                        if (this.ProcessItem(item, nodeID, rightSeg, ref instance.m_segments.m_buffer[rightSeg], ref num, connectOffset, true, false))
+                        {
+                            flag3 = true;
+                        }
+                    }
+
+                    //middle segment
+                    bool anyForwardLane = false;
+                    curLane = instance.m_lanes.m_buffer[instance.m_segments.m_buffer[rightSeg].m_lanes];
+                    ushort midSeg = instance.m_segments.m_buffer[instance.m_segments.m_buffer[item.m_position.m_segment].GetRightSegment(nodeID)].GetRightSegment(nodeID);
+                    for (int i = 0; i < instance.m_segments.m_buffer[midSeg].Info.m_lanes.Length; i++)
+                    {
+                        if (((NetLane.Flags)curLane.m_flags & NetLane.Flags.Forward) == NetLane.Flags.Forward)
+                        {
+                            anyForwardLane = true;
+                            break;
+                        }
+                        curLane = instance.m_lanes.m_buffer[curLane.m_nextLane];
+                    }
+                    if (anyForwardLane)
+                    {
+                        if (this.ProcessItem(item, nodeID, midSeg, ref instance.m_segments.m_buffer[midSeg], ref num, connectOffset, true, false))
+                        {
+                            flag3 = true;
+                        }
+                    }
+                }
+                else
+                {
+                    for (int k = 0; k < 8; k++)
+                    {
+                        if (num16 == 0 || num16 == item.m_position.m_segment)
+                        {
+                            break;
+                        }
+
+                        if (this.ProcessItem(item, nodeID, num16, ref instance.m_segments.m_buffer[(int)num16], ref num, connectOffset, true, false))
+                        {
+                            flag3 = true;
+                        }
+                        num16 = instance.m_segments.m_buffer[(int)num16].GetRightSegment(nodeID);
+                    }
+                }
+
                 if (flag3)
                 {
                     num16 = item.m_position.m_segment;
@@ -872,6 +996,26 @@ namespace LaneChanger
                 }
             }
         }
+
+        private NetLane.Flags GetLaneFlags(ushort segmentId, ushort nodeId)
+        {
+            NetManager instance = NetManager.instance;
+            NetSegment seg = instance.m_segments.m_buffer[segmentId];
+            NetLane.Flags flags = NetLane.Flags.None;
+            NetInfo.Direction dir = NetInfo.Direction.Forward;
+            if (seg.m_startNode == nodeId)
+                dir = NetInfo.Direction.Backward;
+            ulong currentLane = seg.m_lanes;
+            for (int i = 0; i < seg.Info.m_lanes.Length; i++)
+            {
+                if (((seg.Info.m_lanes[i].m_direction & dir) == dir) && seg.Info.m_lanes[i].m_laneType == NetInfo.LaneType.Vehicle)
+                    flags |= (NetLane.Flags)instance.m_lanes.m_buffer[currentLane].m_flags;
+                currentLane = instance.m_lanes.m_buffer[currentLane].m_nextLane;
+            }
+            return flags;
+        }
+
+
         private float CalculateLaneSpeed(byte startOffset, byte endOffset, ref NetSegment segment, NetInfo.Lane laneInfo)
         {
             NetInfo.Direction direction = ((segment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? laneInfo.m_finalDirection : NetInfo.InvertDirection(laneInfo.m_finalDirection);
@@ -889,6 +1033,7 @@ namespace LaneChanger
             }
             return laneInfo.m_speedLimit * 0.2f;
         }
+
         private void ProcessItem(LaneChangerPathFind.BufferItem item, ushort targetNode, bool targetDisabled, ushort segmentID, ref NetSegment segment, uint lane, byte offset, byte connectOffset)
         {
             if ((segment.m_flags & (NetSegment.Flags.PathFailed | NetSegment.Flags.Flooded)) != NetSegment.Flags.None)
@@ -975,6 +1120,7 @@ namespace LaneChanger
                 num8++;
             }
         }
+
         private bool ProcessItem(LaneChangerPathFind.BufferItem item, ushort targetNode, ushort segmentID, ref NetSegment segment, ref int currentTargetIndex, byte connectOffset, bool enableVehicle, bool enablePedestrian)
         {
             bool result = false;
@@ -1120,44 +1266,7 @@ namespace LaneChanger
                                     item2.m_comparisonValue += Mathf.Max(1f, num13 * 3f - 3f) / ((num5 + lane2.m_speedLimit) * 0.5f * this.m_maxLength);
                                 }
                             }
-                            /*
-                            NetSegment seg2 = instance.m_segments.m_buffer[item2.m_position.m_segment];
-                            if (item2.m_direction == NetInfo.Direction.Forward)
-                            {
-                                if (seg2.GetLeftSegment(seg2.m_endNode) == item.m_position.m_segment)
-                                {
-                                    if ((((NetLane.Flags)instance.m_lanes.m_buffer[item2.m_laneID].m_flags) & NetLane.Flags.Left) == NetLane.Flags.Left)
-                                        this.AddBufferItem(item2, item.m_position);
-                                }
-                                else if (seg2.GetRightSegment(seg2.m_endNode) == item.m_position.m_segment)
-                                {
-                                    if ((((NetLane.Flags)instance.m_lanes.m_buffer[item2.m_laneID].m_flags) & NetLane.Flags.Right) == NetLane.Flags.Right)
-                                        this.AddBufferItem(item2, item.m_position);
-                                }  
-                                else
-                                {
-                                    this.AddBufferItem(item2, item.m_position);
-                                }
-                            }
-                            else
-                            {
-                                if (seg2.GetLeftSegment(seg2.m_startNode) == item.m_position.m_segment)
-                                {
-                                    Debug.Log("left seg?");
-                                    if (((((NetLane.Flags)instance.m_lanes.m_buffer[item2.m_laneID].m_flags) & NetLane.Flags.Left) == NetLane.Flags.Left) || ((NetLane.Flags.LeftForwardRight & (NetLane.Flags)instance.m_lanes.m_buffer[item2.m_laneID].m_flags) == NetLane.Flags.None))
-                                        this.AddBufferItem(item2, item.m_position);
-                                }
-                                else if (seg2.GetRightSegment(seg2.m_startNode) == item.m_position.m_segment)
-                                {
-                                    if ((((NetLane.Flags)instance.m_lanes.m_buffer[item2.m_laneID].m_flags) & NetLane.Flags.Right) == NetLane.Flags.Right || ((NetLane.Flags.LeftForwardRight & (NetLane.Flags)instance.m_lanes.m_buffer[item2.m_laneID].m_flags) == NetLane.Flags.None))
-                                        this.AddBufferItem(item2, item.m_position);
-                                }
-                                else
-                                {
-                                    this.AddBufferItem(item2, item.m_position);
-                                }  
-                            }
-                            */
+                            
                             this.AddBufferItem(item2, item.m_position);
                         }
                     }
@@ -1172,6 +1281,7 @@ namespace LaneChanger
             currentTargetIndex = num11;
             return result;
         }
+
         private void ProcessItem(LaneChangerPathFind.BufferItem item, ushort targetNode, ushort segmentID, ref NetSegment segment, byte connectOffset, int laneIndex, uint lane)
         {
             if ((segment.m_flags & (NetSegment.Flags.PathFailed | NetSegment.Flags.Flooded)) != NetSegment.Flags.None)
@@ -1265,6 +1375,7 @@ namespace LaneChanger
                 }
             }
         }
+
         private void AddBufferItem(LaneChangerPathFind.BufferItem item, PathUnit.Position target)
         {
             uint num = this.m_laneLocation[(int)((UIntPtr)item.m_laneID)];
@@ -1339,6 +1450,7 @@ namespace LaneChanger
                 type = NetInfo.LaneType.None;
             }
         }
+
         private void PathFindThread()
         {
             while (true)
@@ -1388,6 +1500,7 @@ namespace LaneChanger
                 }
                 catch (Exception ex)
                 {
+                    Debug.Log("path thread error: " + ex.Message);
                     UIView.ForwardException(ex);
                     CODebugBase<LogChannel>.Error(LogChannel.Core, "Path find error: " + ex.Message + "\n" + ex.StackTrace);
                     PathUnit[] expr_1A0_cp_0 = this.m_pathUnits.m_buffer;
