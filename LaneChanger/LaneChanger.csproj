@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>LaneChanger</RootNamespace>
-    <AssemblyName>LaneChanger</AssemblyName>
+    <AssemblyName>LaneChanger2</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -57,6 +57,8 @@
     <Compile Include="LaneChangerManager.cs" />
     <Compile Include="LaneChangerPathFind.cs" />
     <Compile Include="LaneChangerPathManager.cs" />
+    <Compile Include="LaneChangerSegment.cs" />
+    <Compile Include="LaneChangerSerializableDataExtension.cs" />
     <Compile Include="LaneDirectionToggleButton.cs" />
     <Compile Include="LaneUIPanel.cs" />
     <Compile Include="LaneUIManager.cs" />

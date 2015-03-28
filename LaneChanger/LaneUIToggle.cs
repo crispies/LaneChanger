@@ -24,7 +24,7 @@ namespace LaneChanger
         {
             base.Start();
             this.text = "Lanes";
-            this.transformPosition = new Vector3(-1.65f, 0.96f);
+            this.transformPosition = new Vector3(-1.55f, 0.97f);
             this.normalBgSprite = "ButtonMenu";
             this.disabledBgSprite = "ButtonMenuDisabled";
             this.hoveredBgSprite = "ButtonMenuHovered";

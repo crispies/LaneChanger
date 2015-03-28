@@ -32,6 +32,7 @@ What doesn't work:
 
 TODO:
 - Fix fugly UI
+- Move button to the right to accomodate traffic report tool
 - Add no-right turn support in general case
 - Add appropriate props (no turn signs, etc)
 - Support larger intersections (5-way+)

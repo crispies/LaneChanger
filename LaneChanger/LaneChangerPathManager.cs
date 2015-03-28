@@ -11,17 +11,21 @@ namespace LaneChanger
     public class LaneChangerPathManager : PathManager
     {
         LaneChangerPathFind[] replacementPathFinds;
+        public LaneChangerSegment[] laneChangerSegments;
         
         //On waking up, replace the stock pathfinders with the custom one
         new void Awake()
         {
+            laneChangerSegments = new LaneChangerSegment[32768u];
             PathFind[] stockPathFinds = GetComponents<PathFind>();
-            replacementPathFinds = new LaneChangerPathFind[stockPathFinds.Length];
-            for (int i = 0; i < stockPathFinds.Length; i++)
+            int l = stockPathFinds.Length;
+            replacementPathFinds = new LaneChangerPathFind[l];
+            for (int i = 0; i < l; i++)
             {
                 replacementPathFinds[i] = gameObject.AddComponent<LaneChangerPathFind>();
                 Destroy(stockPathFinds[i]);
             }
+            Debug.Log(string.Format("LaneChanger replaced {0} stock pathfinders.", stockPathFinds.Length));
             typeof(PathManager).GetField("m_pathfinds", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(this, replacementPathFinds);
         }
 
